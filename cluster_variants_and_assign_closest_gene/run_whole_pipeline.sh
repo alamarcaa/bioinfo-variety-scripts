@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Step 1: Get bed files and tables
-python generate_bed_files_and_tables.py ../../output/GWAS/ VB_Immune_GWAS .
+python generate_bed_files_and_tables.py ../../output/GWAS/ BV_Immune_GWAS .
 
 # Step 2: Assign closest gene to each variant
 ./closest_gene.sh

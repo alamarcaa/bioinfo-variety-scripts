@@ -58,11 +58,11 @@ if not os.path.exists(output_filepath + '/all_significant_variant_tables'):
 for i, file in enumerate(os.listdir(files_filepath)):
     if file.endswith('.txt'):
         print(f"File {i+1} of {len(os.listdir(files_filepath))}")
-        f = pd.read_csv(files_filepath + '/' + file, sep="\t", chunksize=100000)
+        f = pd.read_csv(files_filepath + '/' + file, sep="\t", chunksize=100000, index_col=False)
         list_of_downsampled_chunks = []
         for chunk in f:
             list_of_downsampled_chunks.append(chunk[chunk['pval'] < 5.0e-8].copy())
-        phenotype = ''.join(file.split('.')[0].split('_')[3:])
+        phenotype = ''.join(file.split('.')[0].split('_')[3:])  # Take phenotype name from file name
         # print(f'#{i}: {phenotype}')
         concat_df = pd.concat(list_of_downsampled_chunks)
         concat_df = concat_df.assign(Phenotype=phenotype)
@@ -75,9 +75,11 @@ for i, file in enumerate(os.listdir(files_filepath)):
         if chrs_with_hits:
             n = concat_df.iloc[0, 9]  # get N from dataframe
             for chromosome in chrs_with_hits:
+                # Create bed file for UCSC browser
                 make_bed_file_hg38(concat_df[concat_df.chromosome == chromosome].copy(),
                                    label=f'{project_name}_chr{str(chromosome)}_{phenotype}_n{n}_w11_2022',
                                    out=output_filepath + '/bed_files_for_UCSC_browser')
+                # Create table of variants that crossed significance threshold ('hit table')
                 concat_df[concat_df.chromosome == chromosome].to_csv(output_filepath
                                                                      + f'/all_significant_variant_tables/{project_name}_chr{str(chromosome)}_{phenotype}_n{n}_w11_2022_full_table.tsv',
-                                                                     sep='\t')
+                                                                     sep='\t', index=False)
